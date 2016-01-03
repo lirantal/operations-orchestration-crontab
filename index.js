@@ -8,6 +8,8 @@ var OO 				= require('operations-orchestration-api');
 var commandLineArgs = require('command-line-args');
 var jsonfile 		= require('jsonfile');
 var chalk			= require('chalk');
+var fs 				= require('fs');
+var byline 			= require('byline');
 
 var options = {
 	username: 'admin',
@@ -184,9 +186,53 @@ function exportConfig(options) {
 }
 
 
+/**
+ * parses a crontab file
+ * 
+ * @method	parseCrontabFile
+ * @param 	{String}	the filename to parse
+ */
+function parseCrontabFile(filename) {
+
+	var crontabStream = fs.createReadStream(filename);
+	crontabStream = byline.createStream(crontabStream);
+
+	crontabStream.on('readable', function() {
+	  var line;
+	  while (null !== (line = crontabStream.read())) {
+
+	  	var crontabEntry = line.toString();
+
+	  	// skip bash shell comments, identified by a starting # char
+	  	if (crontabEntry[0] === '#') {
+	  		continue;
+	  	}
+
+		var crontabResource = crontabEntry.split(' ');
+		createScheduledFlow
+
+	  }
+	});
+
+}
+
+
+/**
+ * creates a scheduled flow in a remote OO install using RESTful API
+ * 
+ * @method	createScheduledFlow
+ * @param 	{object}	the flow object 
+ */
+function createScheduledFlow(filename) {
+
+}
+
+
 var cliOptions = cliCheck();
 if (!cliOptions) {
 	cliExitError();
 }
 
 console.log(getPackageInfo());
+
+parseCrontabFile('crontab.test.txt');
