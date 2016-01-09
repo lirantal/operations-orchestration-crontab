@@ -141,13 +141,12 @@ function parseCrontabFile(filename) {
 	  	}
 
 		var crontabResource = crontabEntry.split(' ');
-		createScheduledFlow
+		createScheduledFlow(crontabResource);
 
 	  }
 	});
 
 }
-
 
 /**
  * creates a scheduled flow in a remote OO install using RESTful API
@@ -155,8 +154,21 @@ function parseCrontabFile(filename) {
  * @method	createScheduledFlow
  * @param 	{object}	the flow object 
  */
-function createScheduledFlow(filename) {
+function createScheduledFlow(crontabResource) {
 
+	var crontab;
+
+	// if we detect a magic char @ then we process just that
+	if (crontabResource[0].indexOf('@') === 0) {
+		crontab = crontabResource.slice(0, 1);
+	} else {
+		// otherwise we slice the crontab resource array to only 5 elements which is
+		// how UNIX crontab entries are formatted
+		crontab = crontabResource.slice(0, 5);
+	}
+
+	// process scheduled flow with crontabs
+	console.log(crontab);
 }
 
 
@@ -167,4 +179,4 @@ if (!cliOptions) {
 
 console.log(getPackageInfo());
 
-parseCrontabFile('crontab.test.txt');
+parseCrontabFile(cliOptions.crontab);
