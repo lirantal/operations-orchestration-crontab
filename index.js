@@ -11,6 +11,7 @@ var chalk			= require('chalk');
 var fs 				= require('fs');
 var byline 			= require('byline');
 var C2Q				= require('cron-to-quartz');
+var chalk			= require('chalk');
 
 var options = {
 	username: 'admin',
@@ -59,7 +60,7 @@ function cliShowUsage(cliUsage, msg) {
  */
 function cliExitError(msg) {
 
-	console.log(getPackageInfo());
+	console.log();
 	console.log(chalk.red(msg));
 	process.exit(1);
 }
@@ -127,12 +128,16 @@ function cliCheck() {
  */
 function parseCrontabFile(filename) {
 
+	console.log(chalk.yellow('> Parsing CRONTAB file and importing to OO Scheduled flows:'));
+
 	var crontabStream = fs.createReadStream(filename);
 	crontabStream = byline.createStream(crontabStream);
 
 	crontabStream.on('readable', function() {
 	  var line;
 	  while (null !== (line = crontabStream.read())) {
+
+	  	process.stdout.write(chalk.yellow('-'));
 
 	  	var crontabEntry = line.toString();
 
@@ -145,6 +150,7 @@ function parseCrontabFile(filename) {
 		createScheduledFlow(crontabResource);
 
 	  }
+
 	});
 
 }
@@ -193,10 +199,11 @@ function parseCrontabEntry(crontabResource) {
 function createScheduledFlow(crontabResource) {
 
 	var crontab, flow, cronExecutions;
+	var cronExecutionsFailed = [];
 
 	// parseCrontabEntry will parse the crontab resource we get and return an array
 	// of 2 elements, first is the crontab schedule, and second is the crontab execution command
-	crontab = parseCrontabEntry(crontabResource);
+	crontab = parseCrontabEntry(crontabResource);	
 
 	if (crontab.length !== 2) {
 		cliExitError('error parsing crontab entry');
@@ -232,10 +239,17 @@ function createScheduledFlow(crontabResource) {
 		};
 		
 		OO.schedules.scheduleFlow(flow, function(err, body) {
+
+			if (err) {
+				process.stdout.write(chalk.red('+'));
+				cronExecutionsFailed.push(item);
+			} else {
+				process.stdout.write(chalk.green('+'));
+			}
 			
 		});
 		
-	})
+	});
 
 }
 
