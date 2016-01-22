@@ -35,6 +35,7 @@
     "byline": "^4.2.1",
     "chalk": "^1.1.1",
     "command-line-args": "^2.1.3",
+    "cron-to-quartz": "^1.1.0",
     "jsonfile": "^2.2.3",
     "operations-orchestration-api": "^1.0.0"
   }
