@@ -12,6 +12,7 @@ var fs 				= require('fs');
 var byline 			= require('byline');
 var C2Q				= require('cron-to-quartz');
 var chalk			= require('chalk');
+var util			= require('util');														
 
 var options = {
 	username: 'admin',
@@ -46,7 +47,6 @@ function getPackageInfo() {
  */
 function cliShowUsage(cliUsage, msg) {
 
-	console.log(getPackageInfo());
 	console.log(chalk.red(Error(msg)));
 	console.error(cliUsage);
 	process.exit(1);
@@ -89,11 +89,17 @@ function cliCheck() {
 	  { name: 'username', alias: 'u', type: String, description: 'Username for Operations Orchestration that is allowed to query the API' },
 	  { name: 'password', alias: 'p', type: String, description: 'Password for the Username provided' },
 	  { name: 'url', type: String, description: 'The URL where Operations Orchestration API is available. Example: http://localhost:8050' },
+	  { name: 'remotehost', type: String, description: 'The remote host to connect to via SSH and execute the cron commands'},
+	  { name: 'remoteport', type: String, description: 'The remote port to connect to via SSH'},
+	  { name: 'remoteuser', type: String, description: 'The remote username to connect to via SSH'},
+	  { name: 'remotepass', type: String, description: 'The remote password to connect to via SSH'},
 	  { name: 'crontab', type: String, description: 'Crontab file name to read and parse for creating OO scheduled flows' },
 	]);
 
 	var cliOptions = cli.parse();
 	var cliUsage = cli.getUsage();
+
+	var remoteDetailsErrorMsg = 'must provide option of %s to specify the remote host to connect to via SSH and run the scheduled CRONTAB commands';
 
 	if (!cliOptions.url) {
 		cliShowUsage(cliUsage, "must provide url for the OO REST API server");
@@ -108,6 +114,30 @@ function cliCheck() {
 
 	if (cliOptions.password) {
 		options.password = cliOptions.password;
+	}
+
+	if (cliOptions.remotehost) {
+		options.remoteHost = cliOptions.remotehost;
+	} else {
+		cliShowUsage(cliUsage, util.format(remoteDetailsErrorMsg, "--remotehost"));
+	}
+
+	if (cliOptions.remoteport) {
+		options.remotePort = cliOptions.remoteport;
+	} else {
+		cliShowUsage(cliUsage, util.format(remoteDetailsErrorMsg, "--remoteport"));
+	}
+
+	if (cliOptions.remoteuser) {
+		options.remoteUser = cliOptions.remoteuser;
+	} else {
+		cliShowUsage(cliUsage, util.format(remoteDetailsErrorMsg, "--remoteuser"));
+	}
+
+	if (cliOptions.remotepass) {
+		options.remotePass = cliOptions.remotepass;
+	} else {
+		cliShowUsage(cliUsage, util.format(remoteDetailsErrorMsg, "--remotepass"));
 	}
 
 	if (!cliOptions.crontab) {
@@ -229,12 +259,12 @@ function createScheduledFlow(crontabResource) {
 			"inputPromptUseBlank": true,
 			"timeZone": "Asia/Amman",
 			'inputs': {
-				'host': '127.0.0.1',
-				'port': '22',
-				'username': 'root',
-				'password': 'root',
+				'host': options.remoteHost,
+				'port': options.remotePort,
+				'username': options.remoteUser,
+				'password': options.remotePass,
 				'protocol': 'ssh',
-				'command': 'ps',
+				'command': crontab[1].pop(),
 			}
 		};
 		
@@ -254,11 +284,11 @@ function createScheduledFlow(crontabResource) {
 }
 
 
+console.log(getPackageInfo());
+
 var cliOptions = cliCheck();
 if (!cliOptions) {
 	cliExitError();
 }
-
-console.log(getPackageInfo());
 
 parseCrontabFile(cliOptions.crontab);
