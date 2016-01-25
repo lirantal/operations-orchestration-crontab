@@ -19,6 +19,29 @@ npm install operations-orchestration-crontab
 ```
 
 # Usage
+Once installed, this tool provides a shell command that can be executed to to perform an import of Linux CRONTAB file into an [Operations Orchestration](https://hpln.hpe.com/group/operations-orchestration) server by implementing OO's Scheduled Flows API.
+
+## Command line options:
+| Param | Type | Description |
+| --- | --- | --- |
+| -u or --username | string | Username for Operations Orchestration that is allowed to query the API |
+| -p or --password | string | Password for the Username provided |
+| --url | string | The URL where Operations Orchestration API is available. Example: http://localhost:8050 |
+| --remotehost | string | The remote host to connect to via SSH and execute the cron commands |
+| --remoteport | string | The remote port to connect to via SSH |
+| --remoteuser | string | The remote username to connect to via SSH |
+| --remotepass | string | The remote password to connect to via SSH |
+| --crontab | string| Crontab file name to read and parse for creating OO scheduled flows  |
+
+## Example 
+
+### Running on Windows from the downloaded package
+
+You must provide as an input a crontab file of CRON entries to process.
+If on Windows, and you're using the official package hosted on HPE Live Network then just unzip it and run it as follows:
+```bash
+node.exe index.js -u admin -p admin --url http://localhost:8050 --remotehost mylinux.server.com --remoteport 22 --remoteuser root --remotepass root --crontab /tmp/crontab.txt
+```
 
 
 
