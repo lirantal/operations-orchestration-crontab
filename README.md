@@ -1,3 +1,9 @@
+[![view on npm](http://img.shields.io/npm/v/operations-orchestration-crontab.svg)](https://www.npmjs.org/package/operations-orchestration-crontab)
+[![view on npm](http://img.shields.io/npm/l/operations-orchestration-crontab.svg)](https://www.npmjs.org/package/operations-orchestration-crontab)
+[![npm module downloads](http://img.shields.io/npm/dt/operations-orchestration-crontab.svg)](https://www.npmjs.org/package/operations-orchestration-crontab)
+[![Dependency Status](https://david-dm.org/lirantal/operations-orchestration-crontab.svg)](https://david-dm.org/lirantal/operations-orchestration-crontab)
+[![Build](https://travis-ci.org/lirantal/operations-orchestration-crontab.svg?branch=master)](https://travis-ci.org/lirantal/operations-orchestration-crontab)
+[![Coverage Status](https://coveralls.io/repos/lirantal/operations-orchestration-crontab/badge.svg?branch=master&service=github)](https://coveralls.io/github/lirantal/operations-orchestration-crontab?branch=master)
 
 # operations-orchestration-crontab
 NodeJS Tool for scheduling and converting crontab entries to HPE's Operations Orchestration
