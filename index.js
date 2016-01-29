@@ -91,7 +91,7 @@ function cliCheck() {
 	  { name: 'remoteport', type: String, description: 'The remote port to connect to via SSH'},
 	  { name: 'remoteuser', type: String, description: 'The remote username to connect to via SSH'},
 	  { name: 'remotepass', type: String, description: 'The remote password to connect to via SSH'},
-	  { name: 'crontab', type: String, description: 'Crontab file name to read and parse for creating OO scheduled flows' },
+	  { name: 'crontab', type: String, description: 'A local CRONTAB compatible filename to read and parse for creating OO scheduled flows' },
 	]);
 
 	var cliOptions = cli.parse();
