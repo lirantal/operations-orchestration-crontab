@@ -206,7 +206,10 @@ function parseCrontabEntry(crontabResource) {
 	}
 
 	crontabQurtz = C2Q.getQuartz(crontab.join(' '));
-	if (crontabQurtz instanceof Array && crontabQurtz.length === 1) {
+
+	// In some cases, a CRON expression might be converted to 2 Quartz-compatible CRON notations because Quartz
+	// can't handle the OR behavior in one single notation
+	if (crontabQurtz instanceof Array && (crontabQurtz.length >= 1 || crontabQurtz <= 2)) {
 
 		result.push(crontabQurtz);
 		result.push(crontabCommand);
