@@ -13,6 +13,7 @@ var byline 			= require('byline');
 var C2Q				= require('cron-to-quartz');
 var chalk			= require('chalk');
 var util			= require('util');														
+var rl              = require('readline');
 
 var options = {
 	username: 'admin',
@@ -154,33 +155,29 @@ function cliCheck() {
  * @method	parseCrontabFile
  * @param 	{String}	the filename to parse
  */
-function parseCrontabFile(filename) {
+function parseCrontabFile(filename, callback) {
 
 	console.log(chalk.yellow('> Parsing CRONTAB file and importing to OO Scheduled flows:'));
 
 	var crontabStream = fs.createReadStream(filename);
-	crontabStream = byline.createStream(crontabStream);
 
-	crontabStream.on('readable', function() {
-	  var line;
-	  while (null !== (line = crontabStream.read())) {
+	var rlInstance = rl.createInterface({
+		input: crontabStream
+	});
 
+	rlInstance.on('line', function(line) {
 	  	process.stdout.write(chalk.yellow('-'));
 
 	  	var crontabEntry = line.toString();
 
-	  	// skip bash shell comments, identified by a starting # char
-	  	if (crontabEntry[0] === '#') {
-	  		continue;
+	  	// skip bash shell comments, identified by a starting # char or empty lines
+	  	if (crontabEntry.length > 0 && crontabEntry[0] !== '#') {
+
+	  		var crontabResource = crontabEntry.split(' ');
+			createScheduledFlow(crontabResource);
 	  	}
-
-		var crontabResource = crontabEntry.split(' ');
-		createScheduledFlow(crontabResource);
-
-	  }
-
+		
 	});
-
 }
 
 /**
@@ -292,4 +289,7 @@ if (!cliOptions) {
 	cliExitError();
 }
 
-parseCrontabFile(cliOptions.crontab);
+parseCrontabFile(cliOptions.crontab, function() {
+	console.log();
+	console.log('ended');
+});
