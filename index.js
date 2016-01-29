@@ -32,9 +32,7 @@ function getPackageInfo() {
 
 	var str = '';
 	str += pkg.name + "\n";
-	str += pkg.description + "\n";
-	str += 'version: ' + pkg.version + ' by ' + pkg.author + "\n";
-	
+	str += 'version: ' + pkg.version + ' by ' + pkg.author.name + "\n";
 	return str;
 }
 
