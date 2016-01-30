@@ -9,17 +9,19 @@ var commandLineArgs = require('command-line-args');
 var jsonfile 		= require('jsonfile');
 var chalk			= require('chalk');
 var fs 				= require('fs');
-var byline 			= require('byline');
 var C2Q				= require('cron-to-quartz');
 var chalk			= require('chalk');
-var util			= require('util');														
+var util			= require('util');
 var rl              = require('readline');
+var jsonfile		= require('jsonfile');
 
 var options = {
 	username: 'admin',
 	password: 'admin',
 	baseUrl: 'http://localhost:8050'
 };
+
+var log = [];
 
 /**
  * get module package information
@@ -93,6 +95,7 @@ function cliCheck() {
 	  { name: 'remoteuser', type: String, description: 'The remote username to connect to via SSH'},
 	  { name: 'remotepass', type: String, description: 'The remote password to connect to via SSH'},
 	  { name: 'crontab', type: String, description: 'A local CRONTAB compatible filename to read and parse for creating OO scheduled flows' },
+	  { name: 'log', type: String, description: 'A filename for log output of all crontab entries processed and sent to OO scheduling'}
 	]);
 
 	var cliOptions = cli.parse();
@@ -144,6 +147,8 @@ function cliCheck() {
 		return false;
 	}
 
+	options.log = cliOptions.log;
+
 	// set OO API settings
 	OO.setClient(options);
 	return cliOptions;
@@ -155,30 +160,40 @@ function cliCheck() {
  * @method	parseCrontabFile
  * @param 	{String}	the filename to parse
  */
-function parseCrontabFile(filename, callback) {
+var parseCrontabFile = function parseCrontabFile(filename) {
 
-	console.log(chalk.yellow('> Parsing CRONTAB file and importing to OO Scheduled flows:'));
+	return new Promise(function(resolve, reject) {
+		console.log(chalk.yellow('> Parsing CRONTAB file and importing to OO Scheduled flows:'));
 
-	var crontabStream = fs.createReadStream(filename);
+		var crontabEntries = []
 
-	var rlInstance = rl.createInterface({
-		input: crontabStream
+		var crontabStream = fs.createReadStream(filename);
+
+		var rlInstance = rl.createInterface({
+			input: crontabStream
+		});
+
+		rlInstance.on('line', function(line) {
+		  	process.stdout.write(chalk.yellow('-'));
+
+		  	var crontabEntry = line.toString();
+
+		  	// skip bash shell comments, identified by a starting # char or empty lines
+		  	if (crontabEntry.length > 0 && crontabEntry[0] !== '#') {
+
+		  		var crontabResource = crontabEntry.split(' ');
+				//createScheduledFlow(crontabResource);
+				crontabEntries.push(crontabResource);
+		  	}
+			
+		});
+
+		rlInstance.on('close', function() {
+			return resolve(crontabEntries);
+		});
+
 	});
-
-	rlInstance.on('line', function(line) {
-	  	process.stdout.write(chalk.yellow('-'));
-
-	  	var crontabEntry = line.toString();
-
-	  	// skip bash shell comments, identified by a starting # char or empty lines
-	  	if (crontabEntry.length > 0 && crontabEntry[0] !== '#') {
-
-	  		var crontabResource = crontabEntry.split(' ');
-			createScheduledFlow(crontabResource);
-	  	}
-		
-	});
-}
+};
 
 /**
  * parses a crontab entry
@@ -222,64 +237,99 @@ function parseCrontabEntry(crontabResource) {
  * creates a scheduled flow in a remote OO install using RESTful API
  * 
  * @method	createScheduledFlow
- * @param 	{object}	the flow object 
+ * @param 	{array}		the flows to run
  */
-function createScheduledFlow(crontabResource) {
+var createScheduledFlow = function createScheduledFlow(crontabResources) {
 
-	var crontab, flow, cronExecutions;
-	var cronExecutionsFailed = [];
+	return new Promise(function(resolve, reject) {
 
-	// parseCrontabEntry will parse the crontab resource we get and return an array
-	// of 2 elements, first is the crontab schedule, and second is the crontab execution command
-	crontab = parseCrontabEntry(crontabResource);	
+		crontabResources.forEach(function(crontabResource, crontabResourcesIndex, crontabResourcesArray) {
 
-	if (crontab.length !== 2) {
-		cliExitError('error parsing crontab entry');
-	}
+			var crontab, flow, cronExecutions;
 
-	cronExecutions = crontab[0];
-	cronExecutions.forEach(function(item, index, array) {
+			// parseCrontabEntry will parse the crontab resource we get and return an array
+			// of 2 elements, first is the crontab schedule, and second is the crontab execution command
+			crontab = parseCrontabEntry(crontabResource);	
 
-		// Due to a bug in OO 10.51 API the 7 chars Quartz Scheduler syntax isn't supported fully
-		// and it doesn't reconigze the yearly wildcard so we always take out the last array value
-		// which is equivalent to the value of '*'
-
-		item.pop();
-
-		// create flow object
-		flow = {
-			'flowUuid': '0a8f3175-d71e-4426-b578-1ace1fe1d898',
-			'flowScheduleName': 'Scheduled Flow Created By ',
-			'triggerExpression': item.join(' '),
-			'runLogLevel': 'DEBUG',
-			"startDate": Date.now(),
-			"username": 'admin',
-			"inputPromptUseBlank": true,
-			"timeZone": "Asia/Amman",
-			'inputs': {
-				'host': options.remoteHost,
-				'port': options.remotePort,
-				'username': options.remoteUser,
-				'password': options.remotePass,
-				'protocol': 'ssh',
-				'command': crontab[1].pop(),
+			if (crontab.length !== 2) {
+				cliExitError('error parsing crontab entry');
 			}
-		};
-		
-		OO.schedules.scheduleFlow(flow, function(err, body) {
 
-			if (err) {
-				process.stdout.write(chalk.red('+'));
-				cronExecutionsFailed.push(item);
-			} else {
-				process.stdout.write(chalk.green('+'));
-			}
-			
+			cronExecutions = crontab[0];
+			cronExecutions.forEach(function(item, index, array) {
+
+				// Due to a bug in OO 10.51 API the 7 chars Quartz Scheduler syntax isn't supported fully
+				// and it doesn't reconigze the yearly wildcard so we always take out the last array value
+				// which is equivalent to the value of '*'
+
+				item.pop();
+
+				// create flow object
+				flow = {
+					'flowUuid': '0a8f3175-d71e-4426-b578-1ace1fe1d898',
+					'flowScheduleName': 'Scheduled Flow Created By ',
+					'triggerExpression': item.join(' '),
+					'runLogLevel': 'DEBUG',
+					"startDate": Date.now(),
+					"username": 'admin',
+					"inputPromptUseBlank": true,
+					"timeZone": "Asia/Amman",
+					'inputs': {
+						'host': options.remoteHost,
+						'port': options.remotePort,
+						'username': options.remoteUser,
+						'password': options.remotePass,
+						'protocol': 'ssh',
+						'command': crontab[1].pop(),
+					}
+				};
+				
+				OO.schedules.scheduleFlow(flow, function(err, body) {
+
+					if (err) {
+						process.stdout.write(chalk.red('+'));
+					} else {
+						process.stdout.write(chalk.green('+'));
+					}
+
+					if (options.log) {
+						var data = {
+							'crontabResource': crontabResource,
+							'quartzSyntax': item,
+							'error': err ? err.toString() : '',
+							'flow': body
+						};
+
+						log.push(data);
+					}
+
+					if (crontabResourcesIndex === (crontabResourcesArray.length - 1)) {
+						if (index === (array.length - 1)) {
+							return resolve();
+						}
+					}
+					
+				});
+				
+			});
+
 		});
-		
+
 	});
 
-}
+};
+
+var saveToLog = function saveToLog() {
+	return new Promise(function(resolve, reject) {
+		jsonfile.writeFile(options.log, log, { spaces: 2}, function(err) {
+			if (err) {
+				return reject(err);
+			}
+
+			return resolve();
+		});	
+	})
+};
 
 
 console.log(getPackageInfo());
@@ -289,7 +339,12 @@ if (!cliOptions) {
 	cliExitError();
 }
 
-parseCrontabFile(cliOptions.crontab, function() {
-	console.log();
-	console.log('ended');
-});
+parseCrontabFile(cliOptions.crontab)
+	.then(createScheduledFlow)
+	.then(saveToLog)
+	.then(function() {
+		console.log();
+	})
+	.catch(function(error) {
+		console.log(error);
+	});
