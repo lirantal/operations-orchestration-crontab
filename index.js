@@ -21,6 +21,9 @@ var options = {
 	baseUrl: 'http://localhost:8050'
 };
 
+/**
+ * global log array for appending all transactions and processes being made
+ */
 var log = [];
 
 /**
@@ -158,7 +161,7 @@ function cliCheck() {
  * parses a crontab file
  * 
  * @method	parseCrontabFile
- * @param 	{String}	the filename to parse
+ * @param 	{object}	return a promise with array of all crontab entries read from the input file
  */
 var parseCrontabFile = function parseCrontabFile(filename) {
 
@@ -237,7 +240,7 @@ function parseCrontabEntry(crontabResource) {
  * creates a scheduled flow in a remote OO install using RESTful API
  * 
  * @method	createScheduledFlow
- * @param 	{array}		the flows to run
+ * @param 	{object}		returns a promise after all OO schedules have been made
  */
 var createScheduledFlow = function createScheduledFlow(crontabResources) {
 
@@ -319,6 +322,11 @@ var createScheduledFlow = function createScheduledFlow(crontabResources) {
 
 };
 
+/**
+ * log csv processing and OO scheduling calls to a log file
+ * 
+  @method	saveToLog
+ */
 var saveToLog = function saveToLog() {
 	return new Promise(function(resolve, reject) {
 		jsonfile.writeFile(options.log, log, { spaces: 2}, function(err) {
@@ -330,7 +338,6 @@ var saveToLog = function saveToLog() {
 		});	
 	})
 };
-
 
 console.log(getPackageInfo());
 
