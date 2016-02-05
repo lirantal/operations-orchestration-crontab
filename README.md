@@ -44,6 +44,7 @@ If on Windows, and you're using the official package hosted on HPE Live Network 
 node.exe index.js -u admin -p admin --url http://localhost:8050 --remotehost mylinux.server.com --remoteport 22 --remoteuser root --remotepass root --crontab /tmp/crontab.txt
 ```
 
+* Windows users can also get a pre-built package with the node.exe executable and all dependent modules already installed by downloading this content package from the official [HPE Live Network page](https://hpln.hpe.com/contentoffering/operations-orchestration-backup-tool-importexport)
 
 
 # Author
