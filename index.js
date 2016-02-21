@@ -329,6 +329,11 @@ var createScheduledFlow = function createScheduledFlow(crontabResources) {
  */
 var saveToLog = function saveToLog() {
 	return new Promise(function(resolve, reject) {
+
+		if (!options.log) {
+			return resolve();
+		}
+
 		jsonfile.writeFile(options.log, log, { spaces: 2}, function(err) {
 			if (err) {
 				return reject(err);
