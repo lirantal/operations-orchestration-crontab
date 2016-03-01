@@ -246,9 +246,13 @@ var createScheduledFlow = function createScheduledFlow(crontabResources) {
 
 	return new Promise(function(resolve, reject) {
 
+		var cnt = 0;
 		crontabResources.forEach(function(crontabResource, crontabResourcesIndex, crontabResourcesArray) {
 
 			var crontab, flow, cronExecutions;
+			var cntExecutions = 0;
+
+			cnt++;
 
 			// parseCrontabEntry will parse the crontab resource we get and return an array
 			// of 2 elements, first is the crontab schedule, and second is the crontab execution command
@@ -261,6 +265,8 @@ var createScheduledFlow = function createScheduledFlow(crontabResources) {
 			cronExecutions = crontab[0];
 			cronExecutions.forEach(function(item, index, array) {
 
+				cntExecutions++;
+
 				// Due to a bug in OO 10.51 API the 7 chars Quartz Scheduler syntax isn't supported fully
 				// and it doesn't reconigze the yearly wildcard so we always take out the last array value
 				// which is equivalent to the value of '*'
@@ -270,7 +276,7 @@ var createScheduledFlow = function createScheduledFlow(crontabResources) {
 				// create flow object
 				flow = {
 					'flowUuid': '0a8f3175-d71e-4426-b578-1ace1fe1d898',
-					'flowScheduleName': 'Scheduled Flow by CRON-To-Quartz',
+					'flowScheduleName': 'Scheduled Flow by CRON-To-Quartz - ' + cnt + ' - ' + cntExecutions,
 					'triggerExpression': item.join(' '),
 					'runLogLevel': 'DEBUG',
 					"startDate": Date.now(),
