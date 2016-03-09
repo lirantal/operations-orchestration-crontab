@@ -276,10 +276,10 @@ var createScheduledFlow = function createScheduledFlow(crontabResources) {
 				// create flow object
 				flow = {
 					'flowUuid': '0a8f3175-d71e-4426-b578-1ace1fe1d898',
-					'flowScheduleName': 'Scheduled Flow by CRON-To-Quartz - ' + cnt + ' - ' + cntExecutions,
+					'flowScheduleName': 'Scheduled Flow by CRON-To-Quartz - ' + Date.now() + ' - ' + cnt + ' - ' + cntExecutions,
 					'triggerExpression': item.join(' '),
 					'runLogLevel': 'DEBUG',
-					"startDate": Date.now(),
+					"startDate": Date.now() + cnt + cntExecutions,
 					"username": 'admin',
 					"inputPromptUseBlank": true,
 					"timeZone": "Asia/Amman",
