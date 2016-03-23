@@ -14,6 +14,7 @@ var chalk			= require('chalk');
 var util			= require('util');
 var rl              = require('readline');
 var jsonfile		= require('jsonfile');
+var sleep 			= require('sleep');
 
 var options = {
 	username: 'admin',
@@ -161,7 +162,7 @@ function cliCheck() {
  * parses a crontab file
  * 
  * @method	parseCrontabFile
- * @param 	{object}	return a promise with array of all crontab entries read from the input file
+ * @return 	{object}	return a promise with array of all crontab entries read from the input file
  */
 var parseCrontabFile = function parseCrontabFile(filename) {
 
@@ -238,94 +239,128 @@ function parseCrontabEntry(crontabResource) {
 
 /**
  * creates a scheduled flow in a remote OO install using RESTful API
+ * Recursive function to iterate an array of crontab entries and create a schedule flow
  * 
  * @method	createScheduledFlow
- * @param 	{object}		returns a promise after all OO schedules have been made
+ * @param 	{object}		Array of arrays for a crontab representation
+ * @return  {boolean}		Always returns true for looping the entire array and processing (bad/good) all flows
  */
-var createScheduledFlow = function createScheduledFlow(crontabResources) {
+function createScheduledFlow(crontabResources) {
 
-	return new Promise(function(resolve, reject) {
+	var cronExecutions, flow = {};
+	var crontab = crontabResources.pop();
 
-		var cnt = 0;
-		crontabResources.forEach(function(crontabResource, crontabResourcesIndex, crontabResourcesArray) {
+	cronExecutions = crontab[0];
+	cronExecutions.forEach(function(item, index, array) {
 
-			var crontab, flow, cronExecutions;
-			var cntExecutions = 0;
+		// Due to a bug in OO 10.51 API the 7 chars Quartz Scheduler syntax isn't supported fully
+		// and it doesn't reconigze the yearly wildcard so we always take out the last array value
+		// which is equivalent to the value of '*'
 
-			cnt++;
+		item.pop();
 
-			// parseCrontabEntry will parse the crontab resource we get and return an array
-			// of 2 elements, first is the crontab schedule, and second is the crontab execution command
-			crontab = parseCrontabEntry(crontabResource);	
+		// create flow object
+		flow = {
+			'flowUuid': '0a8f3175-d71e-4426-b578-1ace1fe1d898',
+			'flowScheduleName': 'Scheduled Flow by CRON-To-Quartz - ' + Date.now(),
+			'triggerExpression': item.join(' '),
+			'runLogLevel': 'DEBUG',
+			"startDate": Date.now(),
+			"username": 'admin',
+			"inputPromptUseBlank": true,
+			"timeZone": "Asia/Amman",
+			'inputs': {
+				'host': options.remoteHost,
+				'port': options.remotePort,
+				'username': options.remoteUser,
+				'password': options.remotePass,
+				'protocol': 'ssh',
+				'command': crontab[1].pop(),
+			}
+		};
+		
+		OO.schedules.scheduleFlow(flow, function(err, body) {
 
-			if (crontab.length !== 2) {
-				cliExitError('error parsing crontab entry');
+			if (err) {
+				process.stdout.write(chalk.red('+'));
+			} else {
+				process.stdout.write(chalk.green('+'));
 			}
 
-			cronExecutions = crontab[0];
-			cronExecutions.forEach(function(item, index, array) {
-
-				cntExecutions++;
-
-				// Due to a bug in OO 10.51 API the 7 chars Quartz Scheduler syntax isn't supported fully
-				// and it doesn't reconigze the yearly wildcard so we always take out the last array value
-				// which is equivalent to the value of '*'
-
-				item.pop();
-
-				// create flow object
-				flow = {
-					'flowUuid': '0a8f3175-d71e-4426-b578-1ace1fe1d898',
-					'flowScheduleName': 'Scheduled Flow by CRON-To-Quartz - ' + Date.now() + ' - ' + cnt + ' - ' + cntExecutions,
-					'triggerExpression': item.join(' '),
-					'runLogLevel': 'DEBUG',
-					"startDate": Date.now() + cnt + cntExecutions,
-					"username": 'admin',
-					"inputPromptUseBlank": true,
-					"timeZone": "Asia/Amman",
-					'inputs': {
-						'host': options.remoteHost,
-						'port': options.remotePort,
-						'username': options.remoteUser,
-						'password': options.remotePass,
-						'protocol': 'ssh',
-						'command': crontab[1].pop(),
-					}
+			if (options.log) {
+				var data = {
+					'crontabResource': item.join(' '),
+					'error': err ? err.toString() : '',
+					'flow': body
 				};
-				
-				OO.schedules.scheduleFlow(flow, function(err, body) {
 
-					if (err) {
-						process.stdout.write(chalk.red('+'));
-					} else {
-						process.stdout.write(chalk.green('+'));
-					}
+				log.push(data);
+			}
 
-					if (options.log) {
-						var data = {
-							'crontabResource': crontabResource,
-							'quartzSyntax': item,
-							'error': err ? err.toString() : '',
-							'flow': body
-						};
-
-						log.push(data);
-					}
-
-					if (crontabResourcesIndex === (crontabResourcesArray.length - 1)) {
-						if (index === (array.length - 1)) {
-							return resolve();
-						}
-					}
-					
-				});
-				
-			});
+			if (crontabResources.length) {
+				sleep.sleep(1);
+				createScheduledFlow(crontabResources);
+			} else {
+				return true;
+			}
 
 		});
 
 	});
 
+}
+
+/**
+ * creates a scheduled flow in a remote OO install using RESTful API
+ * 
+ * @method	createScheduledFlow
+ * @param 	{object}		an array of crontab scheduling representation
+ * @return 	{object}		returns a promise after all OO schedules have been made
+ */
+var createFlows = function createFlows(crontabResources) {
+
+	return new Promise(function(resolve, reject) {
+
+		createScheduledFlow(crontabResources);
+		return resolve();
+	
+	});
+}
+
+/**
+ * gets a quartzResources array and converts all the items to a crontab representation
+ * 
+ * @method	convertCrontabToCron
+ * @param 	{object}		an array of quartz scheduling representation
+ * @return 	{object}		returns a promise after converting all quartz syntax to crontab
+ */
+var convertCrontabToCron = function convertCrontabToCron(quartzResources) {
+
+	return new Promise(function(resolve, reject) {
+
+		var convertedCrons = [];
+		quartzResources.forEach(function(crontabResource, crontabResourcesIndex, crontabResourcesArray) {
+
+			var crontab;
+
+			// parseCrontabEntry will parse the crontab resource we get and return an array
+			// of 2 elements, first is the crontab schedule, and second is the crontab execution command
+			crontab = parseCrontabEntry(crontabResource);
+
+			if (crontab.length !== 2) {
+				var errMsg = 'error parsing crontab entry';
+				cliExitError(errMsg);
+				return reject(errMsg);
+			}
+
+			convertedCrons.push(crontab);
+			if (crontabResourcesIndex === (quartzResources.length - 1)) {
+				return resolve(convertedCrons);
+			}
+
+		});
+
+	});
 };
 
 /**
@@ -358,7 +393,8 @@ if (!cliOptions) {
 }
 
 parseCrontabFile(cliOptions.crontab)
-	.then(createScheduledFlow)
+	.then(convertCrontabToCron)
+	.then(createFlows)
 	.then(saveToLog)
 	.then(function() {
 		console.log();
