@@ -15,7 +15,6 @@ var chalk = require('chalk');
 var util = require('util');
 var rl = require('readline');
 var jsonfile = require('jsonfile');
-var sleep = require('sleep');
 
 var options = {
   username: 'admin',
@@ -276,66 +275,70 @@ function parseCrontabEntry(crontabResource) {
  */
 function createScheduledFlow(crontabResources) {
 
-  var cronExecutions, flow = {};
-  var crontab = crontabResources.pop();
+  setTimeout(function() {
 
-  cronExecutions = crontab[0];
-  cronExecutions.forEach(function(item, index, array) {
+    var cronExecutions, flow = {};
+    var crontab = crontabResources.pop();
 
-    // Due to a bug in OO 10.51 API the 7 chars Quartz Scheduler syntax isn't supported fully
-    // and it doesn't reconigze the yearly wildcard so we always take out the last array value
-    // which is equivalent to the value of '*'
+    cronExecutions = crontab[0];
+    cronExecutions.forEach(function(item, index, array) {
 
-    item.pop();
+      // Due to a bug in OO 10.51 API the 7 chars Quartz Scheduler syntax isn't supported fully
+      // and it doesn't reconigze the yearly wildcard so we always take out the last array value
+      // which is equivalent to the value of '*'
 
-    // create flow object
-    flow = {
-      'flowUuid': '0a8f3175-d71e-4426-b578-1ace1fe1d898',
-      'flowScheduleName': 'Scheduled Flow by CRON-To-Quartz - ' + Date.now(),
-      'triggerExpression': item.join(' '),
-      'runLogLevel': 'DEBUG',
-      "startDate": Date.now(),
-      "username": 'admin',
-      "inputPromptUseBlank": true,
-      "timeZone": "Asia/Amman",
-      'inputs': {
-        'host': options.remoteHost,
-        'port': options.remotePort,
-        'username': options.remoteUser,
-        'password': options.remotePass,
-        'protocol': 'ssh',
-        'command': crontab[1].pop(),
-      }
-    };
+      item.pop();
 
-    OO.schedules.scheduleFlow(flow, function(err, body) {
+      // create flow object
+      flow = {
+        'flowUuid': '0a8f3175-d71e-4426-b578-1ace1fe1d898',
+        'flowScheduleName': 'Scheduled Flow by CRON-To-Quartz - ' + Date.now(),
+        'triggerExpression': item.join(' '),
+        'runLogLevel': 'DEBUG',
+        "startDate": Date.now(),
+        "username": 'admin',
+        "inputPromptUseBlank": true,
+        "timeZone": "Asia/Amman",
+        'inputs': {
+          'host': options.remoteHost,
+          'port': options.remotePort,
+          'username': options.remoteUser,
+          'password': options.remotePass,
+          'protocol': 'ssh',
+          'command': crontab[1].pop(),
+        }
+      };
 
-      if (err) {
-        process.stdout.write(chalk.red('+'));
-      } else {
-        process.stdout.write(chalk.green('+'));
-      }
+      OO.schedules.scheduleFlow(flow, function(err, body) {
 
-      if (options.log) {
-        var data = {
-          'crontabResource': item.join(' '),
-          'error': err ? err.toString() : '',
-          'flow': body
-        };
+        if (err) {
+          process.stdout.write(chalk.red('+'));
+        } else {
+          process.stdout.write(chalk.green('+'));
+        }
 
-        log.push(data);
-      }
+        if (options.log) {
+          var data = {
+            'crontabResource': item.join(' '),
+            'error': err ? err.toString() : '',
+            'flow': body
+          };
 
-      if (crontabResources.length) {
-        sleep.sleep(1);
-        createScheduledFlow(crontabResources);
-      } else {
-        return true;
-      }
+          log.push(data);
+        }
+
+        if (crontabResources.length) {
+          //sleep.sleep(1);
+          createScheduledFlow(crontabResources);
+        } else {
+          return true;
+        }
+
+      });
 
     });
 
-  });
+  }, 1000);
 
 }
 
