@@ -1,6 +1,6 @@
 {
   "name": "operations-orchestration-crontab",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "NodeJS Tool for scheduling and converting crontab entries to HPE's Operations Orchestration",
   "main": "index.js",
   "scripts": {
