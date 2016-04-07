@@ -214,7 +214,6 @@ var parseCrontabFile = function parseCrontabFile(filename) {
       if (crontabEntry.length > 0 && crontabEntry[0] !== '#') {
 
         var crontabResource = crontabEntry.split(' ');
-        //createScheduledFlow(crontabResource);
         crontabEntries.push(crontabResource);
       }
 
@@ -271,9 +270,10 @@ function parseCrontabEntry(crontabResource) {
  *
  * @method	createScheduledFlow
  * @param 	{object}		Array of arrays for a crontab representation
+ * @param   {function}  resolve function to execute once all flows have been created
  * @return  {boolean}		Always returns true for looping the entire array and processing (bad/good) all flows
  */
-function createScheduledFlow(crontabResources) {
+function createScheduledFlow(crontabResources, resolve) {
 
   setTimeout(function() {
 
@@ -328,10 +328,9 @@ function createScheduledFlow(crontabResources) {
         }
 
         if (crontabResources.length) {
-          //sleep.sleep(1);
-          createScheduledFlow(crontabResources);
+          createScheduledFlow(crontabResources, resolve);
         } else {
-          return true;
+          return resolve();
         }
 
       });
@@ -352,10 +351,7 @@ function createScheduledFlow(crontabResources) {
 var createFlows = function createFlows(crontabResources) {
 
   return new Promise(function(resolve, reject) {
-
-    createScheduledFlow(crontabResources);
-    return resolve();
-
+    createScheduledFlow(crontabResources, resolve);
   });
 }
 
