@@ -197,7 +197,7 @@ var parseCrontabFile = function parseCrontabFile(filename) {
   return new Promise(function(resolve, reject) {
     console.log(chalk.yellow('> Parsing CRONTAB file and importing to OO Scheduled flows:'));
 
-    var crontabEntries = []
+    var crontabEntries = [];
 
     var crontabStream = fs.createReadStream(filename);
 
@@ -353,7 +353,7 @@ var createFlows = function createFlows(crontabResources) {
   return new Promise(function(resolve, reject) {
     createScheduledFlow(crontabResources, resolve);
   });
-}
+};
 
 /**
  * gets a quartzResources array and converts all the items to a crontab representation
@@ -412,7 +412,7 @@ var saveToLog = function saveToLog() {
 
       return resolve();
     });
-  })
+  });
 };
 
 console.log(getPackageInfo());
