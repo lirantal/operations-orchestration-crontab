@@ -4,7 +4,9 @@
   "description": "NodeJS Tool for scheduling and converting crontab entries to HPE's Operations Orchestration",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -41,6 +43,8 @@
     "command-line-usage": "^4.0.0",
     "cron-to-quartz": "^1.1.0",
     "jsonfile": "^2.2.3",
-    "operations-orchestration-api": "^1.0.0"
-  }
+    "operations-orchestration-api": "^1.0.0",
+    "snyk": "^1.34.3"
+  },
+  "snyk": true
 }
