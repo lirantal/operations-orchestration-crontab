@@ -1,10 +1,13 @@
 {
   "name": "operations-orchestration-crontab",
-  "version": "1.3.0",
+  "version": "2.0.0",
   "description": "NodeJS Tool for scheduling and converting crontab entries to HPE's Operations Orchestration",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "engines": {
+    "node": ">=7.6"
   },
   "repository": {
     "type": "git",
@@ -40,7 +43,7 @@
     "command-line-args": "^4.0.6",
     "command-line-usage": "^4.0.0",
     "cron-to-quartz": "^1.1.0",
-    "jsonfile": "^2.2.3",
-    "operations-orchestration-api": "^1.0.0"
+    "jsonfile": "^3.0.0",
+    "operations-orchestration-api": "^2.0.0"
   }
 }

@@ -290,7 +290,7 @@ function createScheduledFlow(crontabResources, resolve) {
     var crontab = crontabResources.pop();
 
     cronExecutions = crontab[0];
-    cronExecutions.forEach(function(item, index, array) {
+    cronExecutions.forEach(async function(item, index, array) {
 
       // Due to a bug in OO 10.51 API the 7 chars Quartz Scheduler syntax isn't supported fully
       // and it doesn't reconigze the yearly wildcard so we always take out the last array value
@@ -318,31 +318,29 @@ function createScheduledFlow(crontabResources, resolve) {
         }
       };
 
-      OO.schedules.scheduleFlow(flow, function(err, body) {
 
-        if (err) {
-          process.stdout.write(chalk.red('+'));
-        } else {
-          process.stdout.write(chalk.green('+'));
-        }
+      let data = {
+        'crontabResource': item.join(' ')
+      }
 
-        if (options.log) {
-          var data = {
-            'crontabResource': item.join(' '),
-            'error': err ? err.toString() : '',
-            'flow': body
-          };
+      try {
+        const body = await OO.schedules.scheduleFlow(flow)
+        process.stdout.write(chalk.green('+'));
+        data.flow = body;
+      } catch (err) {
+        process.stdout.write(chalk.red('+'));
+        data.error = err ? err.toString() : '';
+      }
 
-          log.push(data);
-        }
+      if (options.log) {
+        log.push(data);
+      }
 
-        if (crontabResources.length) {
-          createScheduledFlow(crontabResources, resolve);
-        } else {
-          return resolve();
-        }
-
-      });
+      if (crontabResources.length) {
+        createScheduledFlow(crontabResources, resolve);
+      } else {
+        return resolve();
+      }
 
     });
 
