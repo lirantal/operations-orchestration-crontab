@@ -34,7 +34,7 @@ Once installed, this tool provides a shell command that can be executed to to pe
 | --crontab | string| Crontab file name to read and parse for creating OO scheduled flows  |
 | --log | string | A filename for log output of all crontab entries processed and sent to OO scheduling |
 
-## Example 
+## Example
 
 ### Running on Windows from the downloaded package
 

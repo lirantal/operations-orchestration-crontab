@@ -7,6 +7,7 @@
 
 var OO = require('operations-orchestration-api');
 var commandLineArgs = require('command-line-args');
+var commandLineUsage = require('command-line-usage');
 var jsonfile = require('jsonfile');
 var chalk = require('chalk');
 var fs = require('fs');
@@ -90,7 +91,7 @@ function cliExitClean(msg) {
  */
 function cliCheck() {
 
-  var cli = commandLineArgs([{
+  var cliOptionsStruct = [{
     name: 'username',
     alias: 'u',
     type: String,
@@ -128,10 +129,18 @@ function cliCheck() {
     name: 'log',
     type: String,
     description: 'A filename for log output of all crontab entries processed and sent to OO scheduling'
-  }]);
+  }]
 
-  var cliOptions = cli.parse();
-  var cliUsage = cli.getUsage();
+  var cliOptions = commandLineArgs(cliOptionsStruct)
+
+  var cliUsageStruct = [
+    {
+      header: 'Options',
+      optionList: cliOptionsStruct
+    }
+  ];
+
+  var cliUsage = commandLineUsage(cliUsageStruct);
 
   var remoteDetailsErrorMsg = 'must provide option of %s to specify the remote host to connect to via SSH and run the scheduled CRONTAB commands';
 

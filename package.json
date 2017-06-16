@@ -37,7 +37,8 @@
   "homepage": "https://github.com/lirantal/operations-orchestration-crontab#readme",
   "dependencies": {
     "chalk": "^1.1.1",
-    "command-line-args": "2.1.4",
+    "command-line-args": "^4.0.6",
+    "command-line-usage": "^4.0.0",
     "cron-to-quartz": "^1.1.0",
     "jsonfile": "^2.2.3",
     "operations-orchestration-api": "^1.0.0"
