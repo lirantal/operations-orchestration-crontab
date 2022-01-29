@@ -40,7 +40,7 @@
   "homepage": "https://github.com/lirantal/operations-orchestration-crontab#readme",
   "dependencies": {
     "chalk": "^3.0.0",
-    "command-line-args": "^4.0.6",
+    "command-line-args": "^5.2.0",
     "command-line-usage": "^4.0.0",
     "cron-to-quartz": "^1.1.0",
     "jsonfile": "^3.0.0",
