@@ -1,7 +1,6 @@
 [![view on npm](http://img.shields.io/npm/v/operations-orchestration-crontab.svg)](https://www.npmjs.org/package/operations-orchestration-crontab)
 [![view on npm](http://img.shields.io/npm/l/operations-orchestration-crontab.svg)](https://www.npmjs.org/package/operations-orchestration-crontab)
 [![npm module downloads](http://img.shields.io/npm/dt/operations-orchestration-crontab.svg)](https://www.npmjs.org/package/operations-orchestration-crontab)
-[![Known Vulnerabilities](https://snyk.io/test/github/lirantal/operations-orchestration-crontab/badge.svg?targetFile=package.json)](https://snyk.io/test/github/lirantal/operations-orchestration-crontab?targetFile=package.json)
 [![Security Responsible Disclosure](https://img.shields.io/badge/Security-Responsible%20Disclosure-yellow.svg)](https://github.com/nodejs/security-wg/blob/master/processes/responsible_disclosure_template.md)
 
 [![operations-orchestration-crontab](https://snyk.io/advisor/npm-package/operations-orchestration-crontab/badge.svg)](https://snyk.io/advisor/npm-package/operations-orchestration-crontab)
