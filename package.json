@@ -41,7 +41,7 @@
   "dependencies": {
     "chalk": "^3.0.0",
     "command-line-args": "^4.0.6",
-    "command-line-usage": "^4.0.0",
+    "command-line-usage": "^6.1.1",
     "cron-to-quartz": "^1.1.0",
     "jsonfile": "^3.0.0",
     "operations-orchestration-api": "^2.0.0"
