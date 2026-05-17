@@ -52,6 +52,10 @@ node.exe index.js -u admin -p admin --url http://localhost:8050 --remotehost myl
 
 - Windows users can also get a pre-built package with the node.exe executable and all dependent modules already installed by downloading this content package from the official [HPE Live Network page](https://hpln.hpe.com/contentoffering/operations-orchestration-backup-tool-importexport)
 
+## Contributing
+
+Please consult [CONTRIBUTING](./CONTRIBUTING.md) for guidelines on contributing to this project.
+
 # Author
 
 Liran Tal <liran.tal@gmail.com>
