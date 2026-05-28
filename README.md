@@ -3,7 +3,6 @@
 [![npm module downloads](http://img.shields.io/npm/dt/operations-orchestration-crontab.svg)](https://www.npmjs.org/package/operations-orchestration-crontab)
 [![Security Responsible Disclosure](https://img.shields.io/badge/Security-Responsible%20Disclosure-yellow.svg)](https://github.com/nodejs/security-wg/blob/master/processes/responsible_disclosure_template.md)
 
-[![operations-orchestration-crontab](https://snyk.io/advisor/npm-package/operations-orchestration-crontab/badge.svg)](https://snyk.io/advisor/npm-package/operations-orchestration-crontab)
 
 # operations-orchestration-crontab
 
