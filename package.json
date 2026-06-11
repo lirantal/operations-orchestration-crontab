@@ -1,8 +1,4 @@
 {
-  "publishConfig": {
-    "provenance": true,
-    "access": "public"
-  },
   "name": "operations-orchestration-crontab",
   "version": "2.0.1",
   "description": "NodeJS Tool for scheduling and converting crontab entries to HPE's Operations Orchestration",
@@ -49,5 +45,9 @@
     "cron-to-quartz": "^1.1.0",
     "jsonfile": "^3.0.0",
     "operations-orchestration-api": "^2.0.0"
+  },
+  "publishConfig": {
+    "provenance": true,
+    "access": "public"
   }
 }
